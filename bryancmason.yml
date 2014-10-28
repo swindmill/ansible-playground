@@ -1,0 +1,66 @@
+---
+# Note: None of these examples set subscription_id or management_cert_path
+# It is assumed that their matching environment variables are set.
+
+- hosts: localhost
+  gather_facts: False
+  tasks:
+
+# Provision virtual machine example
+  - name: provision Azure VM
+    local_action:
+      module: azure
+      name: bryancmason
+      role_size: Basic_A0
+      image: b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-14_04_1-LTS-amd64-server-20140927-en-us-30GB
+      location: 'North Central US'
+      user: circuit
+      ssh_cert_path: /home/swindmill/azure/ssh.pem
+      storage_account: bryancmason
+      wait: yes
+      endpoints: 22,80
+    register: azure
+
+  - name: show azure output
+    debug: msg="{{ azure }}"
+
+  - name: wait for SSH
+    local_action: wait_for port=22 host={{ azure.public_dns_name }} search_regex=OpenSSH
+
+  - name: add instance for further management
+    local_action: add_host hostname={{ azure.public_dns_name }} groupname=launched
+
+- hosts: launched
+  sudo: yes
+  user: circuit
+
+  tasks:
+
+  - name: add repository for Oracle java
+    apt_repository: repo="ppa:webupd8team/java"
+    register: oraclerepo
+
+  - name: add puppet repo
+    apt_repository: repo="deb http://apt.puppetlabs.com trusty main"
+
+  - name: add apt key for puppet repo
+    apt_key: url="https://apt.puppetlabs.com/pubkey.gpg"
+
+  - name: make Oracle java installation automatic instead of requiring EULA acceptance
+    shell: echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
+    when: oraclerepo|changed
+
+  - name: upgrade all packages
+    apt: upgrade=full update_cache=yes
+
+  - name: install various packages
+    apt: name=nginx,couchdb,php5-fpm,oracle-java8-set-default,puppet state=present
+
+  - name: create user
+    user: name=bryan comment="Bryan C Mason" group=sudo
+
+  - name: get encrypted public ssh key for Bryan
+    include_vars: vault.yml
+ 
+  - name: add key for bryan
+    authorized_key: user=bryan key="{{ bryan_sshkey }}" 

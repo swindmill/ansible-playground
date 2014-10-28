@@ -1,0 +1,42 @@
+---
+# Note: None of these examples set subscription_id or management_cert_path
+# It is assumed that their matching environment variables are set.
+
+- hosts: localhost
+  gather_facts: False
+  tasks:
+
+# Provision virtual machine example
+  - name: provision Azure VM
+    local_action:
+      module: azure
+      name: circuitpuppet
+      role_size: Basic_A0
+      image: 5112500ae3b842c8b9c604889f8753c3__OpenLogic-CentOS-70-20140926
+      location: 'North Central US'
+      user: circuit
+      ssh_cert_path: /home/swindmill/azure/ssh.pem
+      storage_account: circuits
+      wait: yes
+      endpoints: 22,80
+    register: azure
+
+  - name: show azure output
+    debug: msg="{{ azure }}"
+
+  - name: wait for SSH
+    local_action: wait_for port=22 host={{ azure.public_dns_name }} search_regex=OpenSSH
+
+  - name: add instance for further management
+    local_action: add_host hostname={{ azure.public_dns_name }} groupname=launched
+
+- hosts: launched
+  sudo: yes
+  user: circuit
+
+  tasks:
+
+  - name: setup puppet repo
+    yum: name=http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm state=present
+    
+

@@ -1,0 +1,13 @@
+Mon Oct 27 2014 20:20:38 GMT-0400 (EDT):
+[Error: Credentials have expired, please reauthenticate]
+Error: Credentials have expired, please reauthenticate
+    at /usr/lib/node_modules/azure-cli/lib/util/authentication/adalAuth.js:126:20
+    at /usr/lib/node_modules/azure-cli/node_modules/adal-node/lib/token-request.js:135:11
+    at TokenRequest.<anonymous> (/usr/lib/node_modules/azure-cli/node_modules/adal-node/lib/token-request.js:458:5)
+    at /usr/lib/node_modules/azure-cli/node_modules/adal-node/lib/token-request.js:132:20
+    at /usr/lib/node_modules/azure-cli/node_modules/adal-node/lib/cache-driver.js:353:7
+    at /usr/lib/node_modules/azure-cli/node_modules/adal-node/lib/cache-driver.js:227:9
+    at /usr/lib/node_modules/azure-cli/node_modules/adal-node/lib/cache-driver.js:167:5
+    at /usr/lib/node_modules/azure-cli/lib/util/authentication/token-cache.js:153:7
+    at TokenCache._.extend._loadEntries (/usr/lib/node_modules/azure-cli/lib/util/authentication/token-cache.js:41:14)
+    at TokenCache.find (/usr/lib/node_modules/azure-cli/lib/util/authentication/token-cache.js:149:10)
