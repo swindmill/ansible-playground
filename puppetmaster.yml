@@ -36,7 +36,24 @@
 
   tasks:
 
-  - name: setup puppet repo
-    yum: name=http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm state=present
-    
+  - name: setup yum repos
+    yum: name="{{ item }}"
+    with_items:
+      - http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm
+      - http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-2.noarch.rpm
+      - http://yum.theforeman.org/releases/1.6/el7/x86_64/foreman-release.rpm
 
+  - name: setup foreman SCL repo
+    yum: name=foreman-release-scl disable_gpg_check=yes
+
+  - name: install foreman-installer
+    yum: name=foreman-installer
+
+  - name: add to hosts file
+    lineinfile: dest=/etc/hosts line="{{ ansible_eth0.ipv4.address }} {{ ansible_fqdn }} {{ ansible_hostname }}" 
+
+  - name: disable firewall
+    service: name=firewalld state=stopped enabled=no
+
+#  - name: install foreman
+#    command: "foreman-installer --foreman-configure-scl-repo=false"

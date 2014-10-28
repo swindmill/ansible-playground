@@ -57,7 +57,7 @@
     apt: name=nginx,couchdb,php5-fpm,oracle-java8-set-default,puppet state=present
 
   - name: create user
-    user: name=bryan comment="Bryan C Mason" group=sudo
+    user: name=bryan comment="Bryan C Mason" groups=sudo
 
   - name: get encrypted public ssh key for Bryan
     include_vars: vault.yml
