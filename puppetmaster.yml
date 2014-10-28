@@ -11,7 +11,7 @@
     local_action:
       module: azure
       name: circuitpuppet
-      role_size: Basic_A0
+      role_size: Basic_A1
       image: 5112500ae3b842c8b9c604889f8753c3__OpenLogic-CentOS-70-20140926
       location: 'North Central US'
       user: circuit
@@ -55,5 +55,8 @@
   - name: disable firewall
     service: name=firewalld state=stopped enabled=no
 
-#  - name: install foreman
-#    command: "foreman-installer --foreman-configure-scl-repo=false"
+  - name: disable selinux
+    selinux: state=disabled
+
+  - name: install foreman
+    command: "foreman-installer --foreman-configure-scl-repo=false"
