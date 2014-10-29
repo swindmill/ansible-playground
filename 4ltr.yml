@@ -63,7 +63,7 @@
     copy: src=files/4ltrrc dest=/home/pipeline/.4ltrrc owner=pipeline group=pipeline mode=0644
 
   - name: copy supervisord conf
-    copy: src=files/supervisord.conf dest=/etc/supervisord.conf owner=root group=root mode=0644
+    template: src=templates/supervisord.conf dest=/etc/supervisord.conf owner=root group=root mode=0644
     register: supervisorconf
 
   - name: reload supervisord conf
