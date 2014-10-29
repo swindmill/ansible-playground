@@ -1,0 +1,86 @@
+---
+
+- hosts: nodeapp:service
+  sudo: yes
+  user: ec2-user  
+  tasks:
+
+  - name: install all available yum updates
+    yum: name=* state=latest
+    register: yum_updates
+
+  - name: reboot
+    command: /sbin/reboot
+    when: yum_updates|changed
+    register: rebooted
+
+  - name: wait for the server to reboot
+    local_action: wait_for host={{ inventory_hostname }} port=22 delay=10 search_regex=OpenSSH
+    sudo: no
+    when: rebooted|changed
+
+  - name: retrieve pip installer
+    get_url: url=https://bootstrap.pypa.io/get-pip.py dest=/root/
+    register: pipinstaller
+
+  - name: install pip
+    command: python {{ pipinstaller.dest }}
+    when: pipinstaller|changed
+
+  - name: install supervisor
+    pip: name=supervisor
+
+  - name: copy supervisor init script
+    copy: src=files/supervisor.init dest=/etc/init.d/supervisor mode=0755
+
+  - name: enable supervisor service
+    service: name=supervisor enabled=yes
+
+  - name: create pipeline user
+    user: name=pipeline
+
+  - name: add SSH key for pipeline user
+    authorized_key: user=pipeline key="ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA3I83iNdvcMfEEx8kPUvwCvaTlwLqBKBOaAQSNvHX2E3J9uezpC8kHodPxp7UYJJotYnLDpW2VDavt93YJypK8WeHCQWEI7Um/Vl+2LLyyroo23N/i1xgazuf5XLIPcnLWqcWiaCkUPsMENNNTg+EiwnnZa9+fLqZnnzwly99owCQGOLWiV7bdTJ9G9uyxfH9NeyTrQsTPKSoZzR8Fs+Wg6G+YN+mSShnaxpjGx71wEXcUNn1AecHFBh9aWqg4Zz36X1DGsvAoHSt7Cr96vC52zZMQfl7ft8kkC7uA1/f/kwmZyHM4ahLyLLua3i/gjet4IfrCsa7fvUn1UtfboZ61Q=="
+
+- hosts: nodeapp
+  sudo: yes
+  user: ec2-user
+  tasks:
+
+  - name: install nginx
+    yum: name=http://nginx.org/packages/rhel/6/x86_64/RPMS/nginx-1.6.2-1.el6.ngx.x86_64.rpm state=present
+
+  - name: add repo for nodejs/npm
+    yum: name=https://rpm.nodesource.com/pub/el/6/x86_64/nodesource-release-el6-1.noarch.rpm state=present
+
+  - name: add nodejs package
+    yum: name=nodejs state=present
+
+  - name: add dir for node app
+    file: path=/opt/node-cengage-4ltr owner=pipeline group=pipeline mode=0755 state=directory
+
+  - name: add rc config file for app
+    copy: src=files/4ltrrc dest=/home/pipeline/.4ltrrc owner=pipeline group=pipeline mode=0644
+
+  - name: copy supervisord conf
+    copy: src=files/supervisord.conf dest=/etc/supervisord.conf owner=root group=root mode=0644
+    register: supervisorconf
+
+  - name: reload supervisord conf
+    service: name=supervisor state=reloaded
+    when: supervisorconf|changed
+
+- hosts: service
+  sudo: yes
+  user: ec2-user
+  tasks:
+
+  - name: remove openjdk
+    yum: name=java state=absent
+
+  - name: copy JDK 7 to remote server
+    copy: src=files/jdk-7u71-linux-x64.rpm dest=/root/
+    register: jdk7rpm
+
+  - name: install JDK 7
+    yum: name="{{ jdk7rpm.path }}" state=present
