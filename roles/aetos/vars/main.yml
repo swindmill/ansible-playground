@@ -1,0 +1,3 @@
+---
+
+activemq: "tcp://ceq.awsbase.cengage.info:61616?maximumConnections=1000"

@@ -1,0 +1,4 @@
+---
+
+- name: manage aetos activemq config
+  template: src=activemq.xml dest=/opt/aetos-1.5.5/etc/activemq.xml mode=0644

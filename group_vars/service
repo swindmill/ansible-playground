@@ -1,0 +1,3 @@
+---
+
+logstashconfig: service.logstash-forwarder

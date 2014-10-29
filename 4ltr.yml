@@ -3,7 +3,7 @@
 - hosts: nodeapp:service
   sudo: yes
   user: ec2-user  
-  tasks:
+  pre_tasks:
 
   - name: install all available yum updates
     yum: name=* state=latest
@@ -41,6 +41,10 @@
 
   - name: add SSH key for pipeline user
     authorized_key: user=pipeline key="ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA3I83iNdvcMfEEx8kPUvwCvaTlwLqBKBOaAQSNvHX2E3J9uezpC8kHodPxp7UYJJotYnLDpW2VDavt93YJypK8WeHCQWEI7Um/Vl+2LLyyroo23N/i1xgazuf5XLIPcnLWqcWiaCkUPsMENNNTg+EiwnnZa9+fLqZnnzwly99owCQGOLWiV7bdTJ9G9uyxfH9NeyTrQsTPKSoZzR8Fs+Wg6G+YN+mSShnaxpjGx71wEXcUNn1AecHFBh9aWqg4Zz36X1DGsvAoHSt7Cr96vC52zZMQfl7ft8kkC7uA1/f/kwmZyHM4ahLyLLua3i/gjet4IfrCsa7fvUn1UtfboZ61Q=="
+
+  roles:
+
+    - logstash-forwarder
 
 - hosts: nodeapp
   sudo: yes
@@ -84,3 +88,7 @@
 
   - name: install JDK 7
     yum: name="{{ jdk7rpm.path }}" state=present
+
+  roles:
+
+    - aetos

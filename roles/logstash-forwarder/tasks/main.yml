@@ -1,0 +1,17 @@
+---
+
+  - name: copy logstash package
+    copy: src=logstash-forwarder-0.3.1-1.x86_64.rpm dest=/root/
+
+  - name: install logstash package
+    yum: name=/root/logstash-forwarder-0.3.1-1.x86_64.rpm
+
+  - name: copy logstash configuration
+    copy: src="{{ logstashconfig }}" dest=/etc/logstash-forwarder mode=0644 
+
+  - name: copy wildcard certs
+    copy: src="{{ item.value.filename }}" dest="{{ item.value.dest }}" mode=0644 
+    with_dict: logstash_certs
+
+  - name: ensure logstash-forwarder is running
+    service: name=logstash-forwarder enabled=yes state=started

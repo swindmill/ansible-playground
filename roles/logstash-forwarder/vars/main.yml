@@ -1,0 +1,11 @@
+---
+logstash_certs:
+  cert:
+    filename: star.cengage.info.crt
+    dest: /etc/pki/tls/certs/star.cengage.info.crt
+  key:
+    filename: star.cengage.info.key
+    dest: /etc/pki/tls/private/star.cengage.info.key
+  chaincert:
+    filename: star.cengage.info.chain.crt
+    dest: /etc/pki/tls/certs/star.cengage.info.chain.crt
